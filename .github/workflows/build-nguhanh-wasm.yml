@@ -50,20 +50,19 @@ jobs:
           grep -qi "nguhanh" ../native-uci.log
           grep -qi "Nodes searched" ../native-uci.log
 
-      - name: Install Emscripten
-        run: |
-          git clone --depth 1 https://github.com/emscripten-core/emsdk.git "$RUNNER_TEMP/emsdk"
-          "$RUNNER_TEMP/emsdk/emsdk" install "$EMSDK_VERSION"
-          "$RUNNER_TEMP/emsdk/emsdk" activate "$EMSDK_VERSION"
-          echo "$RUNNER_TEMP/emsdk" >> "$GITHUB_PATH"
-          echo "$RUNNER_TEMP/emsdk/upstream/emscripten" >> "$GITHUB_PATH"
-          echo "EMSDK=$RUNNER_TEMP/emsdk" >> "$GITHUB_ENV"
-          echo "EM_CONFIG=$HOME/.emscripten" >> "$GITHUB_ENV"
-
-      - name: Build WASM
+      - name: Install Emscripten and build WASM
         working-directory: src
         run: |
+          git clone --depth 1 https://github.com/emscripten-core/emsdk.git "$RUNNER_TEMP/emsdk"
+
+          "$RUNNER_TEMP/emsdk/emsdk" install "$EMSDK_VERSION"
+          "$RUNNER_TEMP/emsdk/emsdk" activate "$EMSDK_VERSION"
+
+          source "$RUNNER_TEMP/emsdk/emsdk_env.sh"
+
           emcc -v
+          wasm-opt --version
+
           mkdir -p ../dist
           make -f Makefile_js -j"$(nproc)" build EXE=../dist/stockfish.js
 
